@@ -5,6 +5,7 @@ import re
 import uuid
 
 import streamlit as st
+from dotenv import load_dotenv
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import CharacterTextSplitter
@@ -17,9 +18,13 @@ from langchain_google_genai import GoogleGenerativeAI
 DOCUMENTS_PATH = "./docs"
 BATCH_SIZE = 50
 
+load_dotenv()
 
 if "GOOGLE_API_KEY" not in os.environ:
     os.environ["GOOGLE_API_KEY"] = getpass.getpass("Provide your Google API Key: ")
+
+if "HUGGINGFACEHUB_API_TOKEN" not in os.environ:
+    os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass.getpass("Provide your Hugging Face Hub API Token: ")
 
 
 def load_documents():
@@ -74,8 +79,6 @@ def get_vector_store(init_db):
 
 @st.cache_resource
 def load_qa_chain(init_db):
-    print("Loading QA chain...")
-
     # Get the vector store instance
     vector_store = get_vector_store(init_db=init_db)
 
@@ -113,15 +116,15 @@ def _get_args():
 
 
 def main():
-    st.set_page_config(page_title="ISTQB Q&A")
+    st.set_page_config(page_title="ISTQB Syllabus Q&A")
 
     args = _get_args()
 
     st.session_state.qa_chain = load_qa_chain(init_db=args.init)
-    
-    st.header("ISTQB Q&A")
 
-    question = st.text_input("Insert a question about ISTQB content: ")
+    st.header("ISTQB Syllabus Q&A")
+
+    question = st.text_input("Insert any question about ISTQB syllabus: ")
 
     if question:
         answer = handle_user_question(question)
